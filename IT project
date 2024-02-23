@@ -8,6 +8,9 @@ DATABASE = 'movies.db'
 SECRET_KEY = '765DB43XE1'
 
 def create_database():
+"""
+Izveido datu bāzi, ja tā neeksistē, un izveido tabulas "movies" un "users".     
+"""
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS movies
@@ -20,6 +23,9 @@ def create_database():
 create_database()
 
 def get_db():
+"""
+Iegūst datu bāzes savienojumu
+"""
     db = getattr(g, '_database', None)
     if db is None:
         db = g._database = sqlite3.connect(DATABASE)
@@ -27,17 +33,32 @@ def get_db():
 
 @app.teardown_appcontext
 def close_connection(exception):
+"""
+Pēc pieprasījuma tiek slēgts savienojums ar datu bāzi.
+"""
     db = getattr(g, '_database', None)
     if db is not None:
         db.close()
 
 def insert_movie(title, director, genre, year):
+"""
+"""
+    Pievieno filmu datu bāzei.
+    :param title: Filmas nosaukums
+    :param režisors: Filmas režisors
+    :param žanrs: Filmas žanrs
+    :param gads: Filmas izdošanas gads
+"""
     conn = get_db()
     c = conn.cursor()
     c.execute("INSERT INTO movies (title, director, genre, year) VALUES (?, ?, ?, ?)", (title, director, genre, year))
     conn.commit()
 
 def get_movies():
+"""
+    Iegūst visu filmu sarakstu no datu bāzes.
+    :return: Korpusu saraksts ar informāciju par filmām
+"""
     conn = get_db()
     c = conn.cursor()
     c.execute("SELECT * FROM movies")
@@ -46,11 +67,17 @@ def get_movies():
 
 @app.route('/movies', methods=['GET'])
 def list_movies():
+"""
+Apstrādā GET pieprasījumu, lai iegūtu visu filmu sarakstu.
+"""
     movies = get_movies()
     return jsonify(movies)
 
 @app.route('/movies', methods=['POST'])
 def add_movie():
+"""
+    Apstrādā POST pieprasījumu, lai datubāzei pievienotu jaunu filmu.
+"""
     data = request.get_json()
     title = data.get('The Shawshank Redemption')
     director = data.get('Frank Darabont')
@@ -61,6 +88,9 @@ def add_movie():
 
 @app.route('/register', methods=['POST'])
 def register():
+"""
+Apstrādā POST pieprasījumu, lai reģistrētu jaunu lietotāju.
+"""
     data = request.get_json()
     username = data.get('Pickle')
     password = data.get('9909')
@@ -78,6 +108,9 @@ def register():
 
 @app.route('/login', methods=['POST'])
 def login():
+"""
+Apstrādā lietotāja pieteikšanās POST pieprasījumu.
+"""
     data = request.get_json()
     username = data.get('Pickle')
     password = data.get('9909')
